@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.6.2"><meta name="generator" content="Jekyll v4.1.1" /><meta property="og:title" content="Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions" /><meta name="author" content="Joshua Johanning" /><meta property="og:locale" content="en_US" /><meta name="description" content="Summary" /><meta property="og:description" content="Summary" /><link rel="canonical" href="https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/" /><meta property="og:url" content="https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/" /><meta property="og:site_name" content="josh-ops" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2021-01-04T14:15:00-06:00" /><meta name="twitter:card" content="summary" /><meta property="twitter:title" content="Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions" /><meta name="twitter:site" content="@jjjettrain" /><meta name="twitter:creator" content="@Joshua Johanning" /><meta name="google-site-verification" content="google-site-verification=eTIC71VhPBtwll8rNv7qlXud1yJh6E88No39MdcM_MI" /> <script type="application/ld+json"> {"author":{"@type":"Person","name":"Joshua Johanning"},"description":"Summary","url":"https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/","@type":"BlogPosting","headline":"Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions","dateModified":"2021-01-17T17:12:16-06:00","datePublished":"2021-01-04T14:15:00-06:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/"},"@context":"https://schema.org"}</script><title>Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions | josh-ops</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" href="/assets/css/post.css" as="style"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script defer src="/app.js"></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-GE92ZJY22K"></script> <script> document.addEventListener("DOMContentLoaded", function(event) { window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-GE92ZJY22K'); }); </script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/sample/headshot.png" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">josh-ops</a></div><div class="site-subtitle font-italic">A DevOps Blog</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/about/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-info ml-xl-3 mr-xl-3 unloaded"></i> <span>ABOUT</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-adjust"></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.hasMode) { if (this.isDarkMode) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.hasMode) { if (self.isDarkMode) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } self.updateMermaid(); }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } /* get the current mode on screen */ get modeStatus() { if (this.isDarkMode || (!this.hasMode && this.isSysDarkPrefer) ) { return ModeToggle.DARK_MODE; } else { return ModeToggle.LIGHT_MODE; } } updateMermaid() { if (typeof mermaid !== "undefined") { let expectedTheme = (this.modeStatus === ModeToggle.DARK_MODE? "dark" : "default"); let config = { theme: expectedTheme }; /* re-render the SVG › <https://github.com/mermaid-js/mermaid/issues/311#issuecomment-332557344> */ $(".mermaid").each(function() { let svgCode = $(this).prev().children().html(); $(this).removeAttr("data-processed"); $(this).html(svgCode); }); mermaid.initialize(config); mermaid.init(undefined, ".mermaid"); } } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } this.updateMermaid(); } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/soccerjoshj07" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/jjjettrain" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href=" javascript:location.href = 'mailto:' + ['jjohanning','uwalumni.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-8"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><h1 data-toc-skip>Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions</h1><div class="post-meta text-muted d-flex flex-column"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Mon, Jan 4, 2021, 2:15 PM -0600" > Jan 4 <i class="unloaded">2021-01-04T14:15:00-06:00</i> </span> by <span class="author"> Joshua Johanning </span></div><div> Updated <span class="timeago lastmod" data-toggle="tooltip" data-placement="bottom" title="Sun, Jan 17, 2021, 5:12 PM -0600" > Jan 17 <i class="unloaded">2021-01-17T17:12:16-06:00</i> </span></div></div><div class="post-content"><h2 id="summary">Summary</h2><p>I needed to be able to restore my NuGet packages hosted in an Azure Artifacts instance in a GitHub Action workflow. In Azure Pipelines, it’s relatively simple with the <a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/packages/nuget-restore?view=azure-devops">Restore NuGet Packages</a> task. However, there is not really an equivalent native Action to be able to add to the workflow to accomplish this.</p><p>I tried this 3rd party Action titled <a href="https://github.com/marketplace/actions/shubham90-nugetauth">shubham90-nugetauth</a>, but couldn’t really get it to work. The inputs only called for the <code class="language-plaintext highlighter-rouge">azure-devops-org-url</code>, not a particular Artifact feed, so I wasn’t sure how it sets up the configuration for the feeds since an organization could have multiple NuGet feeds. I will say I did not spend a lot of time on this Action, though.</p><p>What I did instead was borrow some of my scripting knowledge from my <a href="/posts/nuget-pusher-script/">NuGet Pusher</a> post to programmatically add my Azure Artifacts feed as a source (with credentials) and restore the solution. This is summarized with two simple commands:</p><div class="language-yaml highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre>    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Auth NuGet</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">nuget sources add -Name ${{ env.nuget_feed_name }} -Source ${{ env.nuget_feed_source }} -username "az" -password ${{ secrets.AZDO_PAT }} -ConfigFile ${{ env.nuget_config }}</span>
+     
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Restore NuGet Packages</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">nuget restore ${{ env.solution_file }}</span>
+</pre></table></code></div></div><p>The solution I was working with was a full .NET Framework 4.6.1, so I’m also using the <code class="language-plaintext highlighter-rouge">windows-latest</code> runner, but this should work with .NET Core with the simple tweak of using <code class="language-plaintext highlighter-rouge">dotnet restore</code> instead of <code class="language-plaintext highlighter-rouge">nuget restore</code>.</p><h2 id="setup">Setup</h2><p>Let’s take a step back and add some things that are necessary to make this work.</p><ol><li>First, we have to create a secret either at the repository or GitHub organization with an Azure DevOps PAT that has access to the Artifact feed. I called my secret: <code class="language-plaintext highlighter-rouge">AZDO_PAT</code><li>If the secret name is named something different, make sure to modify the <code class="language-plaintext highlighter-rouge">nuget sources add ... -password ${{ secrets.AZDO_PAT }}</code> command to use the appropriate secret.<li>Next, we have to add in a few other environment variables to the GitHub Action workflow:</ol><div class="language-yaml highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="na">env</span><span class="pi">:</span>
+  <span class="na">solution_file</span><span class="pi">:</span> <span class="s1">'</span><span class="s">My.NetFramework47.App.sln'</span>
+  <span class="na">nuget_feed_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">My-Azure-Artifacts-Feed'</span>
+  <span class="na">nuget_feed_source</span><span class="pi">:</span> <span class="s1">'</span><span class="s">https://pkgs.dev.azure.com/&lt;AZURE-DEVOPS-ORGANIZATION&gt;/_packaging/&lt;MY-AZURE-ARTIFACTS-FEED&gt;/nuget/v3/index.json'</span>
+  <span class="na">nuget_config</span><span class="pi">:</span> <span class="s1">'</span><span class="s">.nuget/NuGet.Config'</span>
+</pre></table></code></div></div><p>Note that my Azure Artifacts feed was scoped to the Organization level, the NuGet Feed Source url will be slightly different depending on if you used a Project feed. The source URL can be found by navigating to the Azure Artifacts feed and clicking the <code class="language-plaintext highlighter-rouge">Connect to Feed</code> button.</p><h2 id="complete-workflow">Complete Workflow</h2><p>Including the complete workflow for reference - the only bit custom here is the environment variables and the Auth NuGet and Restore NuGet Packages command Actions.</p><div class="language-yaml highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+</pre><td class="rouge-code"><pre><span class="c1"># For most projects, this workflow file will not need changing; you simply need</span>
+<span class="c1"># to commit it to your repository.</span>
+<span class="c1">#</span>
+<span class="c1"># You may wish to alter this file to override the set of languages analyzed,</span>
+<span class="c1"># or to provide custom queries or build logic.</span>
+<span class="c1">#</span>
+<span class="c1"># ******** NOTE ********</span>
+<span class="c1"># We have attempted to detect the languages in your repository. Please check</span>
+<span class="c1"># the `language` matrix defined below to confirm you have the correct set of</span>
+<span class="c1"># supported CodeQL languages.</span>
+<span class="c1">#</span>
+<span class="na">name</span><span class="pi">:</span> <span class="s2">"</span><span class="s">CodeQL"</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span> <span class="nv">master</span> <span class="pi">]</span>
+  <span class="na">pull_request</span><span class="pi">:</span>
+    <span class="c1"># The branches below must be a subset of the branches above</span>
+    <span class="na">branches</span><span class="pi">:</span> <span class="pi">[</span> <span class="nv">master</span> <span class="pi">]</span>
+  <span class="na">schedule</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">cron</span><span class="pi">:</span> <span class="s1">'</span><span class="s">19</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">2'</span>
+  <span class="na">workflow_dispatch</span><span class="pi">:</span>  <span class="c1"># manual trigger</span>
+
+<span class="na">env</span><span class="pi">:</span>
+  <span class="na">solution_file</span><span class="pi">:</span> <span class="s1">'</span><span class="s">My.NetFramework47.App.sln'</span>
+  <span class="na">nuget_feed_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">My-Azure-Artifacts-Feed'</span>
+  <span class="na">nuget_feed_source</span><span class="pi">:</span> <span class="s1">'</span><span class="s">https://pkgs.dev.azure.com/&lt;AZURE-DEVOPS-ORGANIZATION&gt;/_packaging/&lt;MY-AZURE-ARTIFACTS-FEED&gt;/nuget/v3/index.json'</span>
+  <span class="na">nuget_config</span><span class="pi">:</span> <span class="s1">'</span><span class="s">.nuget/NuGet.Config'</span>
+  
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">analyze</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">Analyze</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">windows-latest</span>
+
+    <span class="na">strategy</span><span class="pi">:</span>
+      <span class="na">fail-fast</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">matrix</span><span class="pi">:</span>
+        <span class="na">language</span><span class="pi">:</span> <span class="pi">[</span> <span class="s1">'</span><span class="s">csharp'</span> <span class="pi">]</span>
+        <span class="c1"># CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]</span>
+        <span class="c1"># Learn more:</span>
+        <span class="c1"># https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed</span>
+
+    <span class="na">steps</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Checkout repository</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+
+    <span class="c1"># Initializes the CodeQL tools for scanning.</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Initialize CodeQL</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">github/codeql-action/init@v1</span>
+      <span class="na">with</span><span class="pi">:</span>
+        <span class="na">languages</span><span class="pi">:</span> <span class="s">${{ matrix.language }}</span>
+        <span class="c1"># If you wish to specify custom queries, you can do so here or in a config file.</span>
+        <span class="c1"># By default, queries listed here will override any specified in a config file.</span>
+        <span class="c1"># Prefix the list here with "+" to use these queries and those in the config file.</span>
+        <span class="c1"># queries: ./path/to/local/query, your-org/your-repo/queries@main</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Auth NuGet</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">nuget sources add -Name ${{ env.nuget_feed_name }} -Source ${{ env.nuget_feed_source }} -username "az" -password ${{ secrets.AZDO_PAT }} -ConfigFile ${{ env.nuget_config }}</span>
+     
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Restore NuGet Packages</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">nuget restore ${{ env.solution_file }}</span>
+    
+    <span class="c1"># Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).</span>
+    <span class="c1"># If this step fails, then you should remove it and run the build manually (see below)</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Autobuild</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">github/codeql-action/autobuild@v1</span>
+
+    <span class="c1"># ℹ️ Command-line programs to run using the OS shell.</span>
+    <span class="c1"># 📚 https://git.io/JvXDl</span>
+
+    <span class="c1"># ✏️ If the Autobuild fails above, remove it and uncomment the following three lines</span>
+    <span class="c1">#    and modify them (or add more) to build your code if your project</span>
+    <span class="c1">#    uses a compiled language</span>
+
+    <span class="c1">#- run: |</span>
+    <span class="c1">#   make bootstrap</span>
+    <span class="c1">#   make release</span>
+
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Perform CodeQL Analysis</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">github/codeql-action/analyze@v1</span>
+</pre></table></code></div></div><h2 id="improvement-ideas">Improvement Ideas</h2><ol><li>The <code class="language-plaintext highlighter-rouge">Restore NuGet Packages</code> command might not be needed since the <code class="language-plaintext highlighter-rouge">Autobuild</code> action performs a restore as well - therefore one may also be able to remove the <code class="language-plaintext highlighter-rouge">solution_file</code> variable<li>If your solution does not contain a NuGet.config file (<code class="language-plaintext highlighter-rouge">nuget_config: '.nuget/NuGet.Config'</code>), you may have to create a temporary config file similar to how the <a href="https://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/NuGetCommandV2/nugetrestore.ts#L136">NuGet Command</a> task works in Azure DevOps<li>If you the <code class="language-plaintext highlighter-rouge">Autobuild</code> Action does not successfully build your project, you will have to build it manually. Using full .NET Framework, there is an additional Action that you need to add to add MSBuild to the path (<code class="language-plaintext highlighter-rouge">warrenbuckley/Setup-MSBuild@v1</code>). This Action requires <code class="language-plaintext highlighter-rouge">ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'</code> to be set because <a href="https://github.blog/changelog/2020-10-01-github-actions-deprecating-set-env-and-add-path-commands/">GitHub Actions: Deprecating set-env and add-path commands</a>. Also make sure to add the <code class="language-plaintext highlighter-rouge">/p:UseSharedCompilation=false</code> argument mentioned from <a href="https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/troubleshooting-the-codeql-workflow#no-code-found-during-the-build">Troubleshooting the CodeQL workflow: No code found during the build</a>. Here’s an example:</ol><div class="language-yaml highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre>    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Setup MSBuild Path</span>
+      <span class="na">uses</span><span class="pi">:</span> <span class="s">warrenbuckley/Setup-MSBuild@v1</span>
+      <span class="na">env</span><span class="pi">:</span>
+        <span class="na">ACTIONS_ALLOW_UNSECURE_COMMANDS</span><span class="pi">:</span> <span class="s1">'</span><span class="s">true'</span>
+
+    <span class="s">...</span>
+ 
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">MSBuild Solution</span>
+      <span class="na">run</span><span class="pi">:</span> <span class="s">msbuild ${{ env.solution_file }} /p:Configuration=debug /p:UseSharedCompilation=false</span>
+</pre></table></code></div></div></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/github/'>GitHub</a>, <a href='/categories/devops/'>DevOps</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/azure-devops/" class="post-tag no-text-decoration" >Azure DevOps</a> <a href="/tags/nuget/" class="post-tag no-text-decoration" >NuGet</a> <a href="/tags/github/" class="post-tag no-text-decoration" >GitHub</a> <a href="/tags/azure-artifacts/" class="post-tag no-text-decoration" >Azure Artifacts</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions - josh-ops&url=https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions - josh-ops&u=https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://telegram.me/share?text=Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions - josh-ops&url=https://josh-ops.com/posts/authorize-azure-artifacts-in-github-actions/" data-toggle="tooltip" data-placement="top" title="Telegram" target="_blank" rel="noopener" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-3 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/angular-tokenization/">Tokenizing Angular Environment Configuration in Azure DevOps</a><li><a href="/posts/nuget-pusher-script/">Quickly Migrate NuGet Packages to a New Feed En Masse</a><li><a href="/posts/extends-template/">Azure DevOps: Extends Template with Build and Deployment Templates</a><li><a href="/posts/github-codeql-pr/">GitHub: Block Pull Request if Code Scanning Alerts Are Found</a><li><a href="/posts/authorize-azure-artifacts-in-github-actions/">Authorize and Restore Azure Artifacts NuGet Packages in GitHub Actions</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/azure-devops/">Azure DevOps</a> <a class="post-tag" href="/tags/github/">GitHub</a> <a class="post-tag" href="/tags/nuget/">NuGet</a> <a class="post-tag" href="/tags/azure-artifacts/">Azure Artifacts</a> <a class="post-tag" href="/tags/codeql/">CodeQL</a> <a class="post-tag" href="/tags/pipeline-templates/">Pipeline Templates</a> <a class="post-tag" href="/tags/pull-requests/">Pull Requests</a> <a class="post-tag" href="/tags/work-items/">Work Items</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-8"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/nuget-pusher-script/"><div class="card-body"> <span class="timeago small" > Dec 23, 2020 <i class="unloaded">2020-12-23T16:45:00-06:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Quickly Migrate NuGet Packages to a New Feed En Masse</h3><div class="text-muted small"><p> Summary This is a very simple bash script that can assist you in migrating NuGet packages to a different Artifact feed. It’s written with Azure DevOps in mind as a target, but there’s no reason wh...</p></div></div></a></div><div class="card"> <a href="/posts/extends-template/"><div class="card-body"> <span class="timeago small" > Dec 10, 2020 <i class="unloaded">2020-12-10T22:00:00-06:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Azure DevOps: Extends Template with Build and Deployment Templates</h3><div class="text-muted small"><p> Scenario I had a client that wanted to integrate a secret scanning utility (among other checks) into the pipeline, and enforce this control. Colin Dembovsky (my co-worker) and I typically recommen...</p></div></div></a></div><div class="card"> <a href="/posts/reparent-work-items/"><div class="card-body"> <span class="timeago small" > Jan 17 <i class="unloaded">2021-01-17T16:30:00-06:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Azure DevOps: Bulk Reparent Work Items</h3><div class="text-muted small"><p> Reparent Work Items in the UI If you are reparenting only a few work items, then the easiest way is to use the Mapping view in the Azure DevOps backlog, as described by Microsoft: Reparent Wor...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/nuget-pusher-script/" class="btn btn-outline-primary"><p>Quickly Migrate NuGet Packages to a New Feed En Masse</p></a> <a href="/posts/reparent-work-items/" class="btn btn-outline-primary"><p>Azure DevOps: Bulk Reparent Work Items</p></a></div><script src="https://utteranc.es/client.js" repo="soccerjoshj07/soccerjoshj07.github.io" issue-term="title" theme="preferred-color-scheme" crossorigin="anonymous" async> </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://github.com/soccerjoshj07">Josh Johanning</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div><div class="footer-right"><p class="mb-0"> Powered by <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a> with <a href="https://github.com/cotes2020/jekyll-theme-chirpy/" target="_blank" rel="noopener">Chirpy</a> theme.</p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/azure-devops/">Azure DevOps</a> <a class="post-tag" href="/tags/github/">GitHub</a> <a class="post-tag" href="/tags/nuget/">NuGet</a> <a class="post-tag" href="/tags/azure-artifacts/">Azure Artifacts</a> <a class="post-tag" href="/tags/codeql/">CodeQL</a> <a class="post-tag" href="/tags/pipeline-templates/">Pipeline Templates</a> <a class="post-tag" href="/tags/pull-requests/">Pull Requests</a> <a class="post-tag" href="/tags/work-items/">Work Items</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://josh-ops.com{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script>
